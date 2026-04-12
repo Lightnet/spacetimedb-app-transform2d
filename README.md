@@ -76,7 +76,7 @@ export const transform2d = table(
   - [x] reducer
     - [x] update transform2d if isDirty to propagation.
       - [x] update the local and world matrix for parent and child matches.
-    - [x] set transform2d position, rotation and scale from world matrix
+    - [x] set transform2d position, rotation and scale to local matrix
     - [x] set position
     - [x] set rotation
     - [x] set scale
@@ -84,13 +84,10 @@ export const transform2d = table(
   - [ ] schedule
   - [ ] Procedures:
     - [x] get parent id
-    - [x] get position from local matrix
-    - [x] get rotation from local matrix
-    - [x] get scale from local matrix
-    - [x] get position from world matrix
-    - [x] get rotation from world matrix
-    - [x] get scale from world matrix
-    - [x] get transform2d position, rotation and scale from world matrix
+    - [x] get position from local or world matrix
+    - [x] get rotation from local or world matrix
+    - [x] get scale from local or world matrix
+    - [x] get transform2d position, rotation and scale from local or world matrix
 
 
 # Config:
@@ -138,10 +135,11 @@ spacetime sql --server local spacetime-app-transform2d "SELECT * FROM transform3
 ```
 spacetime sql --server local spacetime-app-transform2d "SELECT * FROM transform2d" > backup_your_table.txt
 ```
+ Test
 
 # Delete
 ```
-spacetime publish --server local spacetime-app-transform --delete-data
+spacetime publish --server local spacetime-app-transform2d --delete-data
 ```
  In case bug and can't update table error.
 
@@ -183,7 +181,7 @@ export const transform2d = table(
 ```
 
 # Client api:
-  Work in progress.
+  Sample test that use threejs build in 2d to 3d translate flat 2d world.
 
 ## setup:
 
