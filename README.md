@@ -76,18 +76,22 @@ export const transform2d = table(
   - [x] reducer
     - [x] update transform2d if isDirty to propagation.
       - [x] update the local and world matrix for parent and child matches.
+    - [x] set transform2d position, rotation and scale from world matrix
     - [x] set position
     - [x] set rotation
     - [x] set scale
     - [x] set parent id
   - [ ] schedule
   - [ ] Procedures:
-    - [ ] get position from local matrix
-    - [ ] get rotation from local matrix
-    - [ ] get scale from local matrix
+    - [x] get parent id
+    - [x] get position from local matrix
+    - [x] get rotation from local matrix
+    - [x] get scale from local matrix
     - [x] get position from world matrix
-    - [ ] get rotation from world matrix
-    - [ ] get scale from world matrix
+    - [x] get rotation from world matrix
+    - [x] get scale from world matrix
+    - [x] get transform2d position, rotation and scale from world matrix
+
 
 # Config:
   Make sure the application database name match the server and client. Since using the ***spacetime dev*** command line to run development mode to watch and build.
@@ -169,9 +173,9 @@ export const transform2d = table(
     entityId: t.string().primaryKey(),
     parentId: t.string().optional(),
     isDirty:t.bool().default(true),
-    position: SVector2,
-    rotation: t.f32(),
-    scale: SVector2,
+    position: Vect2,
+    rotation: t.f32(), // degree
+    scale: Vect2,
     localMatrix: t.array(t.f32()).optional(),
     worldMatrix: t.array(t.f32()).optional(),
   }
@@ -310,7 +314,28 @@ function setupDBTransform2D(){
   });
 ```
   Delete Entity base on entityId. Check for any components to be delete as well.
+
 ## Transform 2D:
+ There are get and set function for transform 2D. Can get and set for parent, transform2d (all input and output but not parent id), position, rotation and scale. As well other debug call functions.
+ 
+### setTransform2DParent:
+```js
+  conn.reducers.setTransform2DParent({
+    entityId:PARAMS.entityId,
+    parentId:id // parentId
+  })
+```
+
+### setTransform2D:
+```js
+conn.reducers.setTransform2D({
+    entityId:PARAMS.entityId, 
+    position:PARAMS.t2_position, // {x=0,y=0,z=0}
+    rotation:PARAMS.t2_rotation, 
+    scale:PARAMS.t2_scale, // {x=1,y=1,z=1}
+  });
+```
+
 ### setTransform2DPosition:
 ```js
   conn.reducers.setTransform2DPosition({
@@ -319,6 +344,7 @@ function setupDBTransform2D(){
     y:PARAMS.t2_position.y
   });
 ```
+
 ### setTransform2DRotation:
 ```js
   conn.reducers.setTransform2DRotation({
@@ -326,6 +352,7 @@ function setupDBTransform2D(){
     rotation: PARAMS.t2_rotation // degree
   });
 ```
+
 ### setTransform2DScale:
 ```js
   conn.reducers.setTransform2DScale({
@@ -334,13 +361,56 @@ function setupDBTransform2D(){
     y:PARAMS.t2_scale.y
   })
 ```
-### setTransform2DParent:
+
+### getTransform2DParentId:
 ```js
-  conn.reducers.setTransform2DParent({
-    entityId:PARAMS.entityId,
-    parentId:id // parentId
-  })
+  let _parentId = await conn.procedures.getTransform2DParentId({
+    entityId:PARAMS.entityId
+  });
+  console.log("Parent Id:", _parentId)
 ```
+### getLocalTransform2D:
+```js
+  let t2d = await conn.procedures.getLocalTransform2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("getLocalTransform2D:", t2d);
+  // {position:{x:1,y:1,z:0},rotation:0,scale:{x:1,y:1,z:1}}
+```
+
+### getLocalPosition2D:
+```js
+  let pos = await conn.procedures.getLocalPosition2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("pos:", pos)
+```
+
+### getLocalRotation2D:
+```js
+  let rot = await conn.procedures.getLocalRotation2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("rot:", rot)
+```
+
+### getLocalScale2D:
+```js
+  let scale = await conn.procedures.getLocalScale2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("scale:", scale)
+```
+
+### getWorldTransform2D:
+```js
+  let t2d = await conn.procedures.getWorldTransform2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("getWorldTransform2D:", t2d);
+  // {position:{x:1,y:1,z:0},rotation:0,scale:{x:1,y:1,z:1}}
+```
+
 ### getWorldPosition2D:
 ```js
   let pos = await conn.procedures.getWorldPosition2D({
@@ -348,6 +418,23 @@ function setupDBTransform2D(){
   });
   console.log("pos:", pos)
 ```
+
+### getWorldRotation2D:
+```js
+  let rot = await conn.procedures.getWorldRotation2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("rot:", rot)
+```
+
+### getWorldScale2D:
+```js
+  let scale = await conn.procedures.getWorldScale2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("scale:", scale)
+```
+
 ### clearAllTransforms:
 ```js
   conn.reducers.clearAllTransforms();

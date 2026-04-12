@@ -548,27 +548,50 @@ let transform2DPropsFolder = pane.addFolder({
 
 position2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_position').on('change',()=>{
   // console.log("change position")
-  conn.reducers.setTransform2DPosition({
+  // conn.reducers.setTransform2DPosition({
+  //   entityId:PARAMS.entityId,
+  //   x:PARAMS.t2_position.x,
+  //   y:PARAMS.t2_position.y
+  // });
+
+  conn.reducers.setTransform2D({
     entityId:PARAMS.entityId,
-    x:PARAMS.t2_position.x,
-    y:PARAMS.t2_position.y
+    position:PARAMS.t2_position,
+    rotation:PARAMS.t2_rotation,
+    scale:PARAMS.t2_scale,
   });
   // conn.reducers.updateAllTransform2D();
 })
 rotation2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_rotation').on('change',()=>{
-  conn.reducers.setTransform2DRotation({
+  // conn.reducers.setTransform2DRotation({
+  //   entityId:PARAMS.entityId,
+  //   rotation: PARAMS.t2_rotation
+  // });
+
+  conn.reducers.setTransform2D({
     entityId:PARAMS.entityId,
-    rotation: PARAMS.t2_rotation
+    position:PARAMS.t2_position,
+    rotation:PARAMS.t2_rotation,
+    scale:PARAMS.t2_scale,
   });
   // conn.reducers.updateAllTransform2D();
 })
 scale2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_scale').on('change',()=>{
-  conn.reducers.setTransform2DScale({
-    entityId:PARAMS.entityId,
-    x:PARAMS.t2_scale.x,
-    y:PARAMS.t2_scale.y
-  })
+  // conn.reducers.setTransform2DScale({
+  //   entityId:PARAMS.entityId,
+  //   x:PARAMS.t2_scale.x,
+  //   y:PARAMS.t2_scale.y
+  // })
   // conn.reducers.updateAllTransform2D();
+
+  conn.reducers.setTransform2D({
+    entityId:PARAMS.entityId,
+    position:PARAMS.t2_position,
+    rotation:PARAMS.t2_rotation,
+    scale:PARAMS.t2_scale,
+  });
+
+
 })
 //-----------------------------------------------
 // TEST
@@ -585,9 +608,65 @@ testFolder.addButton({title:'clear transforms'}).on('click',()=>{
   conn.reducers.clearAllTransforms();
 })
 
-testFolder.addButton({title:'get transform2d position'}).on('click', async ()=>{
+testFolder.addButton({title:'get transform2d parent id'}).on('click', async ()=>{
+  let _parentId = await conn.procedures.getTransform2DParentId({
+    entityId:PARAMS.entityId
+  });
+  console.log("Parent Id:", _parentId)
+})
+
+testFolder.addButton({title:'get transform2d local position'}).on('click', async ()=>{
+  let pos = await conn.procedures.getLocalPosition2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("pos:", pos)
+})
+
+testFolder.addButton({title:'get transform2d local rotation'}).on('click', async ()=>{
+  let rot = await conn.procedures.getLocalRotation2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("rot:", rot)
+})
+
+testFolder.addButton({title:'get transform2d local scale'}).on('click', async ()=>{
+  let scale = await conn.procedures.getLocalScale2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("scale:", scale)
+})
+
+testFolder.addButton({title:'get transform2d world position'}).on('click', async ()=>{
   let pos = await conn.procedures.getWorldPosition2D({
     entityId:PARAMS.entityId
   });
   console.log("pos:", pos)
 })
+
+testFolder.addButton({title:'get transform2d world rotation'}).on('click', async ()=>{
+  let rot = await conn.procedures.getWorldRotation2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("rot:", rot)
+})
+
+testFolder.addButton({title:'get transform2d world scale'}).on('click', async ()=>{
+  let scale = await conn.procedures.getWorldScale2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("scale:", scale)
+});
+
+testFolder.addButton({title:'get local transform2d'}).on('click', async ()=>{
+  let t2d = await conn.procedures.getLocalTransform2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("getLocalTransform2D:", t2d)
+});
+
+testFolder.addButton({title:'get world transform2d'}).on('click', async ()=>{
+  let t2d = await conn.procedures.getWorldTransform2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("getWorldTransform2D:", t2d)
+});

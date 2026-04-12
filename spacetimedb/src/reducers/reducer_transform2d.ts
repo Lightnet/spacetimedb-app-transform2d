@@ -4,6 +4,7 @@
 import { t, SenderError } from 'spacetimedb/server';
 import spacetimedb from '../module';
 import { computeLocal2DMatrix, getParentWorldMatrix, multiply2D } from '../helper_transform2d';
+import { Vect2 } from '../types';
 //-----------------------------------------------
 // ADD ENTITY TRANSFORM 2D
 //-----------------------------------------------
@@ -34,7 +35,6 @@ export const add_entity_transform2d = spacetimedb.reducer(
     });
   }
 });
-
 //-----------------------------------------------
 // REMOVE ENTITY TRANSFORM 2D
 //-----------------------------------------------
@@ -59,8 +59,7 @@ export const set_transform2d_parent = spacetimedb.reducer(
     child.isDirty = true;                    // ← add this
     ctx.db.transform2d.entityId.update(child);
     markSubtreeDirty2D(ctx, entityId);       // ← add this
-  });
-
+});
 // Efficient BFS version - marks entire subtree dirty when parent changes
 function markSubtreeDirty2D(ctx: any, rootEntityId: string) {
   const toMark: string[] = [rootEntityId];
@@ -87,7 +86,28 @@ function markSubtreeDirty2D(ctx: any, rootEntityId: string) {
     }
   }
 };
+//-----------------------------------------------
+// SET TRANSFORM 2D POSITION, ROTATION AND SCALE
+//-----------------------------------------------
+export const set_transform2d = spacetimedb.reducer(
+  { entityId: t.string(), position:Vect2, rotation:t.f64(), scale:Vect2}, 
+  (ctx, { entityId, position, rotation, scale}) => {
+  const t2d = ctx.db.transform2d.entityId.find(entityId);
+  if(t2d){
+    console.log("update 2d position, rotation and scale");
+    t2d.position.x = position.x;
+    t2d.position.y = position.y;
+    t2d.rotation = rotation;
+    t2d.scale.x = scale.x;
+    t2d.scale.y = scale.y;
 
+    t2d.localMatrix = computeLocal2DMatrix(t2d);
+    t2d.isDirty = true;
+    ctx.db.transform2d.entityId.update(t2d);
+    markSubtreeDirty2D(ctx, entityId);
+    update_all_transform2d(ctx,{});
+  }
+});
 //-----------------------------------------------
 // SET TRANSFORM 2D POSITION
 //-----------------------------------------------
@@ -154,7 +174,6 @@ export const clear_all_transforms = spacetimedb.reducer((ctx) => {
     }
   }
 });
-
 // Main propagation function (BFS topological update)
 function updateTransformHierarchy2D(ctx: any) {
   const dirtyRoots: string[] = [];

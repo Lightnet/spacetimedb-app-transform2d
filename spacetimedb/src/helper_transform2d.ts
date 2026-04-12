@@ -61,3 +61,49 @@ export function getParentWorldMatrix(dbCtx: any, parentId: string | undefined ):
 export function extractPositionFromMatrix(mat: Matrix2D): { x: number; y: number } {
   return { x: mat[2], y: mat[5] };
 }
+
+/**
+ * Extracts scale {x, y} from a 2D matrix.
+ * Returns positive lengths (non-negative). 
+ * If you need to detect mirroring/flips, check the sign separately.
+ */
+export function extractScaleFromMatrix(mat: Matrix2D): { x: number; y: number } {
+  // Length of first column vector (affected by scaleX and rotation)
+  const scaleX = Math.sqrt(mat[0] * mat[0] + mat[3] * mat[3]);
+  // Length of second column vector (affected by scaleY and rotation)
+  const scaleY = Math.sqrt(mat[1] * mat[1] + mat[4] * mat[4]);
+  return { x: scaleX, y: scaleY };
+}
+
+/**
+ * Extracts rotation in degrees from a 2D matrix (your flat 3x3 format).
+ * Works well with your SRT composition order (Scale → Rotate → Translate).
+ * Uses atan2 for stability and correct quadrant.
+ */
+export function extractRotationFromMatrix(mat: Matrix2D): number {
+  // mat[0] = a = sx * cos(θ)
+  // mat[3] = c = sy * sin(θ)   (in your matrix layout)
+  const a = mat[0];
+  const c = mat[3];
+
+  const rotationRad = Math.atan2(c, a);
+  let rotationDeg = rotationRad * (180 / Math.PI);
+
+  // Optional: normalize to [0, 360) range
+  rotationDeg = ((rotationDeg % 360) + 360) % 360;
+
+  return rotationDeg;
+}
+
+/**
+ * Combined extraction for convenience (rotation + scale in one call)
+ */
+export function extractRotationAndScaleFromMatrix(mat: Matrix2D): {
+  rotationDeg: number;
+  scale: { x: number; y: number };
+} {
+  return {
+    rotationDeg: extractRotationFromMatrix(mat),
+    scale: extractScaleFromMatrix(mat)
+  };
+}
