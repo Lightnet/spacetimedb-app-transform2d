@@ -204,8 +204,6 @@ function createBox(){
 function create_2d(){
   let size = 1
   const geometry = new THREE.PlaneGeometry(size, size);
-  // const material = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-  // const mesh = new THREE.Mesh(geometry, material);
 
   const edges = new THREE.EdgesGeometry(geometry);
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
@@ -229,8 +227,6 @@ function update_model2d(mesh, row){
   // mesh.rotation.z = worldRotation;
   const worldRot = extractWorldRotation(row.worldMatrix)
   mesh.rotation.z = worldRot * (Math.PI / 180); 
-
-
   mesh.scale.set(worldScale.x, worldScale.y, 1);
 }
 
@@ -275,7 +271,6 @@ function delete_model2D(ctx, row){
     }
   }
   PARAMS.transform2d=PARAMS.transform2d.filter(r=>r.entityId!=row.entityId)
-
 }
 
 function setupDBTransform2D(){
@@ -588,4 +583,11 @@ testFolder.addButton({title:'transform list'}).on('click',()=>{
 
 testFolder.addButton({title:'clear transforms'}).on('click',()=>{
   conn.reducers.clearAllTransforms();
+})
+
+testFolder.addButton({title:'get transform2d position'}).on('click', async ()=>{
+  let pos = await conn.procedures.getWorldPosition2D({
+    entityId:PARAMS.entityId
+  });
+  console.log("pos:", pos)
 })

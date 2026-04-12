@@ -2,7 +2,8 @@
 // MODULE
 //-----------------------------------------------
 import { schema, table, t, SenderError  } from 'spacetimedb/server';
-import { entity, transform2d } from './tables/table_entity';
+import { entity } from './tables/table_entity';
+import { transform2d } from './tables/table_transform2d';
 //-----------------------------------------------
 // SCEHEMA
 //-----------------------------------------------
