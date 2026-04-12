@@ -5,7 +5,7 @@
 # SpaceTimeDB
  - 2.1.0
 
-# Transform 3D Hierarchy:
+# Transform 2D Hierarchy:
   This is transform 2D hierarchy to test parent and child matrix for position, rotation and scale. With the help of Grok AI agent. To able to use three js matrix and helper to handle transform 2D hierarchy. Note this use matrix3 not matrix4.
   
   It was tricky to setup 2d world with three javascript build. Since it 3D is convert to 2D that use x and y.
@@ -18,7 +18,7 @@
 - https://spacetimedb.com/docs/databases/transactions-atomicity
 
 
-![Screenshot of browser test](screenshots/transform3d20260410.png)
+![Screenshot of browser test](screenshots/transform2d_20260411.png)
 
 # Editor:
   Current testing the position, quaternion, scale to update for box transform 3d. Using the Tweakpane for debug sync from the SpaceTimeDB. Tweakpane required code how to setup and clean up and reuse ui.
