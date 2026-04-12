@@ -230,12 +230,20 @@ export const clear_all_transforms = spacetimedb.reducer((ctx) => {
 // 
 //-----------------------------------------------
 // Returns identity matrix if no parent or parent not found
-function getParentWorldMatrix(ctx: any, parentId: string | undefined): Matrix2D {
+// function getParentWorldMatrix(ctx: any, parentId: string | undefined): Matrix2D {
+//   if (!parentId) return identity;
+
+//   const parent = ctx.db.transform2d.entityId.find(parentId);
+//   return parent ? parent.worldMatrix : identity;
+// }
+
+function getParentWorldMatrix(dbCtx: any, parentId: string | undefined ): Matrix2D {
   if (!parentId) return identity;
 
-  const parent = ctx.db.transform2d.entityId.find(parentId);
-  return parent ? parent.worldMatrix : identity;
+  const parent = dbCtx.db.transform2d.entityId.find(parentId);
+  return parent?.worldMatrix ?? identity;   // ← safe fallback
 }
+
 
 
 // Main propagation function (BFS topological update)
@@ -294,3 +302,62 @@ export const update_all_transform2d = spacetimedb.reducer((ctx) => {
   console.log("Running full 2D hierarchy update");
   updateTransformHierarchy2D(ctx);
 });
+
+
+//-----------------------------------------------
+// GET WORLD POSITION 2D (as Procedure - Read-only)
+//-----------------------------------------------
+
+// Return type definition
+type WorldPosition2D = { x: number; y: number };
+
+// Helper to extract position from a worldMatrix (last column)
+// function extractPositionFromMatrix(worldMatrix: Matrix2D): { x: number; y: number } {
+//   return {
+//     x: worldMatrix[2],  // translation x (row-major: index 2)
+//     y: worldMatrix[5],  // translation y (index 5)
+//   };
+// }
+
+// Helper to safely get parent world matrix
+// function getParentWorldMatrix(dbCtx: any, parentId: string | undefined | null): Matrix2D {
+//   if (!parentId) return identity;
+
+//   const parent = dbCtx.db.transform2d.entityId.find(parentId);
+//   return parent?.worldMatrix ?? identity;   // ← safe fallback
+// }
+
+// Extract {x, y} from worldMatrix (translation is at indices 2 and 5 in row-major 3x3)
+function extractPositionFromMatrix(mat: Matrix2D): { x: number; y: number } {
+  return { x: mat[2], y: mat[5] };
+}
+
+const WorldPosition2D = t.object('WorldPosition2D', {
+  x: t.f64(),
+  y: t.f64()
+})
+
+// Main procedure - uses withTx for safe read access
+//-----------------------------------------------
+// GET WORLD POSITION 2D - PROCEDURE
+//-----------------------------------------------
+export const get_world_position_2d = spacetimedb.procedure(
+  { entityId: t.string() },
+  t.option( WorldPosition2D ),
+  // t.option(t.object({ x: t.f64(), y: t.f64() })),// nope
+  (ctx, { entityId }) => {
+    return ctx.withTx((tx) => {
+      const t = tx.db.transform2d.entityId.find(entityId);
+      if (!t) return undefined;
+
+      const local = t.isDirty 
+        ? computeLocal2DMatrix(t) 
+        : (t.localMatrix as Matrix2D) ?? identity;
+
+      const parentWorld = getParentWorldMatrix(tx, t.parentId);
+      const worldMat = multiply2D(parentWorld, local);
+
+      return extractPositionFromMatrix(worldMat);
+    });
+  }
+);
