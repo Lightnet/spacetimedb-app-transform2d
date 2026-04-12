@@ -201,7 +201,7 @@ export const set_transform2d_position = spacetimedb.reducer(
     markSubtreeDirty2D(ctx, entityId);
     // _transform2d.worldMatrix = localMatrix;
     // console.log(_transform2d.position)
-    
+    update_all_transform2d(ctx,{});
   }
 });
 //-----------------------------------------------
@@ -218,7 +218,7 @@ export const set_transform2d_rotation = spacetimedb.reducer(
     t2d.isDirty = true;
     ctx.db.transform2d.entityId.update(t2d);
     markSubtreeDirty2D(ctx, entityId);
-    // update_all_transform2d(ctx,{});
+    update_all_transform2d(ctx,{});
   }
 });
 //-----------------------------------------------
@@ -236,7 +236,7 @@ export const set_transform2d_scale = spacetimedb.reducer(
     _transform2d.isDirty = true;
     ctx.db.transform2d.entityId.update(_transform2d)
     markSubtreeDirty2D(ctx, entityId);
-    // update_all_transform2d(ctx,{});
+    update_all_transform2d(ctx,{});
     // _transform2d.worldMatrix = localMatrix;
   }
 });

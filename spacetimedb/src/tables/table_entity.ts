@@ -2,7 +2,7 @@
 // 
 //-----------------------------------------------
 import { table, t } from 'spacetimedb/server';
-import { Coordinates, Quaternion, SVector2 } from '../types';
+import { SVector2 } from '../types';
 //-----------------------------------------------
 // 
 //-----------------------------------------------

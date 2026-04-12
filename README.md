@@ -21,7 +21,7 @@
 ![Screenshot of browser test](screenshots/transform2d_20260411.png)
 
 # Editor:
-  Current testing the position, quaternion, scale to update for box transform 3d. Using the Tweakpane for debug sync from the SpaceTimeDB. Tweakpane required code how to setup and clean up and reuse ui.
+  Current testing the position, rotation for degree, scale to update for box transform 2d. Using the Tweakpane for debug sync from the SpaceTimeDB. Tweakpane quick setup for ui editor build test.
 
 ## Features:
 - [x] create entity

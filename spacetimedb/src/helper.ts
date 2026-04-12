@@ -24,33 +24,12 @@ export function generateUniqueId(ctx: any, prefix: string = "id"): string {
   // You can also include a tiny bit of time if you want (but keep it deterministic)
   return `${prefix}_${randomPart}`;
 }
-
 export function getAllMethods(obj: any): string[] {
   // Use Object.getOwnPropertyNames to get all property names (including non-enumerable ones, if necessary)
   return Object.getOwnPropertyNames(obj).filter(function (prop) {
     // Check if the property value is of type 'function'
     return typeof obj[prop] === 'function';
   });
-}
-
-// import * as TestDB from 'spacetimedb/server';
-// const methods = getAllMethods(TestDB);
-// console.log(TestDB);
-//-----------------------------------------------
-// 
-//-----------------------------------------------
-export function validateName(name: string) {
-  if (!name) {
-    throw new SenderError('Names must not be empty');
-  }
-}
-//-----------------------------------------------
-// 
-//-----------------------------------------------
-export function validateMessage(text: string) {
-  if (!text) {
-    throw new SenderError('Messages must not be empty');
-  }
 }
 //-----------------------------------------------
 // 

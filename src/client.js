@@ -101,20 +101,12 @@ function extractWorldRotation(worldMatrix){
   return angleDeg;
 }
 
-
 let scene;
 let camera;
 let renderer;
 let gizmo;
 let orbitControls;
-
-let transform3DPropsFolder;
-let entityLogBinding;
-let addTransform3DBinding;
-let removeTransform3DBinding;
 let deleteEntityBinding;
-let hierarchy3DParentBinding;
-let hierarchyFolder;
 let marker;
 let addTransform2DBinding;
 let removeTransform2DBinding;
@@ -126,13 +118,7 @@ let hierarchyParentBinding;
 const PARAMS = {
   entityId:'',
   entities:[],
-  transform3d:[],
   transform2d:[],
-
-  t_position:{x:0,y:0,z:0},
-  t_rotation:{x:0,y:0,z:0},
-  t_scale:{x:1,y:1,z:1},
-
   t2_position:{x:0,y:0},
   t2_rotation:0,
   t2_scale:{x:1,y:1},
@@ -419,7 +405,6 @@ deleteEntityBinding = entityFolder.addButton({title: 'Delete Entity'}).on('click
 })
 entityFolder.addButton({title: 'Entities Logs'}).on('click',()=>{
   console.log(PARAMS.entities);
-  console.log(PARAMS.transform3d);
 });
 deleteEntityBinding.disabled = true;
 
@@ -541,9 +526,7 @@ function update_transform2d_parent(){
   if(_transform && _transform.parentId != ""){
     _parent = _transform.parentId;
   }
-
-  console.log(parentOptions);
-
+  // console.log(parentOptions);
   hierarchyParentBinding = t2dhierarchyFolder.addBlade({
   view: 'list',
   label: 'Parent:',
@@ -575,14 +558,14 @@ position2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_position').on(
     x:PARAMS.t2_position.x,
     y:PARAMS.t2_position.y
   });
-  conn.reducers.updateAllTransform2D();
+  // conn.reducers.updateAllTransform2D();
 })
 rotation2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_rotation').on('change',()=>{
   conn.reducers.setTransform2DRotation({
     entityId:PARAMS.entityId,
     rotation: PARAMS.t2_rotation
   });
-  conn.reducers.updateAllTransform2D();
+  // conn.reducers.updateAllTransform2D();
 })
 scale2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_scale').on('change',()=>{
   conn.reducers.setTransform2DScale({
@@ -590,7 +573,7 @@ scale2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_scale').on('chang
     x:PARAMS.t2_scale.x,
     y:PARAMS.t2_scale.y
   })
-  conn.reducers.updateAllTransform2D();
+  // conn.reducers.updateAllTransform2D();
 })
 //-----------------------------------------------
 // TEST
