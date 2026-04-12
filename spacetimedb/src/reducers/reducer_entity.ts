@@ -108,18 +108,6 @@ function scale2D(sx: number, sy: number): Matrix2D {
   return [sx, 0, 0, 0, sy, 0, 0, 0, 1];
 }
 
-// Helper to multiply two 3x3 row-major matrices: C = A * B
-// function multiply2D(a: Matrix2D, b: Matrix2D): Matrix2D {
-//   const r: Matrix2D = [0,0,0, 0,0,0, 0,0,0];
-//   for (let i = 0; i < 3; i++) {
-//     for (let j = 0; j < 3; j++) {
-//       for (let k = 0; k < 3; k++) {
-//         r[i * 3 + j] += a[i * 3 + k] * b[k * 3 + j];
-//       }
-//     }
-//   }
-//   return r;
-// }
 function multiply2D(a: Matrix2D, b: Matrix2D): Matrix2D {
   return [
     a[0]*b[0] + a[1]*b[3] + a[2]*b[6],
@@ -135,18 +123,6 @@ function multiply2D(a: Matrix2D, b: Matrix2D): Matrix2D {
     a[6]*b[2] + a[7]*b[5] + a[8]*b[8],
   ];
 }
-
-
-
-// Correct composition for proper orbiting:
-// Scale → Rotate → Translate  (this is the most common correct order)
-// function computeLocal2DMatrix(t: any): Matrix2D {
-//   const scaleMat = scale2D(t.scale.x, t.scale.y);
-//   const rotateMat = rotate2D(t.rotation);
-//   const translateMat = translate2D(t.position.x, t.position.y);
-//   // SRT order: Scale → Rotate → Translate
-//   return multiply2D(translateMat, multiply2D(rotateMat, scaleMat));
-// }
 
 function computeLocal2DMatrix(t: any): Matrix2D {
   const scaleMat   = scale2D(t.scale.x, t.scale.y);
@@ -227,14 +203,14 @@ export const set_transform2d_rotation = spacetimedb.reducer(
 export const set_transform2d_scale = spacetimedb.reducer(
   { entityId: t.string(),x:t.f64(), y:t.f64()}, 
   (ctx, { entityId, x, y}) => {
-  const _transform2d = ctx.db.transform2d.entityId.find(entityId);
-  if(_transform2d){
+  const t2d = ctx.db.transform2d.entityId.find(entityId);
+  if(t2d){
     console.log("update position2d");
-    _transform2d.scale.x = x;
-    _transform2d.scale.y = y;
-    _transform2d.localMatrix  = computeLocal2DMatrix(_transform2d);
-    _transform2d.isDirty = true;
-    ctx.db.transform2d.entityId.update(_transform2d)
+    t2d.scale.x = x;
+    t2d.scale.y = y;
+    t2d.localMatrix  = computeLocal2DMatrix(t2d);
+    t2d.isDirty = true;
+    ctx.db.transform2d.entityId.update(t2d)
     markSubtreeDirty2D(ctx, entityId);
     update_all_transform2d(ctx,{});
     // _transform2d.worldMatrix = localMatrix;
@@ -251,86 +227,70 @@ export const clear_all_transforms = spacetimedb.reducer((ctx) => {
   }
 });
 //-----------------------------------------------
-// update all transform2d
+// 
 //-----------------------------------------------
+// Returns identity matrix if no parent or parent not found
+function getParentWorldMatrix(ctx: any, parentId: string | undefined): Matrix2D {
+  if (!parentId) return identity;
 
-//-----------------------------------------------
-// update all transform2d (HIERARCHY PROPAGATION)
-//-----------------------------------------------
-export const update_all_transform2d = spacetimedb.reducer((ctx) => {
-  console.log("=== Starting transform update ===");
+  const parent = ctx.db.transform2d.entityId.find(parentId);
+  return parent ? parent.worldMatrix : identity;
+}
 
-  const transforms = new Map<string, any>();
-  const dirtyIds = new Set<string>();
 
-  // First pass: cache everything
+// Main propagation function (BFS topological update)
+function updateTransformHierarchy2D(ctx: any) {
+  const dirtyRoots: string[] = [];
+  const visited = new Set<string>();
+
+  // Step 1: Collect all dirty roots (transforms with no parent or whose parent is not dirty)
   for (const t of ctx.db.transform2d.iter()) {
-    transforms.set(t.entityId, { ...t }); // shallow copy to avoid mutation issues
-    if (t.isDirty) dirtyIds.add(t.entityId);
-  }
+    if (!t.isDirty) continue;
 
-  if (dirtyIds.size === 0) {
-    console.log("No dirty transforms");
-    return;
-  }
+    const hasDirtyParent = t.parentId && 
+      ctx.db.transform2d.entityId.find(t.parentId)?.isDirty === true;
 
-  // Build children map once (much faster than repeated iter())
-  const childrenMap = new Map<string, string[]>();
-  for (const [id, t] of transforms) {
-    if (t.parentId) {
-      if (!childrenMap.has(t.parentId)) childrenMap.set(t.parentId, []);
-      childrenMap.get(t.parentId)!.push(id);
+    if (!t.parentId || !hasDirtyParent) {
+      dirtyRoots.push(t.entityId);
     }
   }
 
-  // Queue: start with dirty nodes that have no dirty parent (roots of dirty subtrees)
-  const queue: string[] = [];
-  for (const id of dirtyIds) {
-    const t = transforms.get(id)!;
-    const parentDirty = t.parentId && dirtyIds.has(t.parentId);
-    if (!parentDirty) {
-      queue.push(id);
-    }
-  }
-
-  let processed = 0;
-
+  // Step 2: BFS from dirty roots — process level by level
+  const queue = [...dirtyRoots];
+  console.log("dirtyRoots: ",queue.length)
   while (queue.length > 0) {
     const entityId = queue.shift()!;
-    const transform = transforms.get(entityId);
-    if (!transform) continue;
+    if (visited.has(entityId)) continue;
+    visited.add(entityId);
 
-    let worldMat: Matrix2D;
+    const t2d = ctx.db.transform2d.entityId.find(entityId);
+    if (!t2d) continue;
 
-    if (!transform.parentId) {
-      worldMat = [...(transform.localMatrix as Matrix2D)];
-    } else {
-      const parent = transforms.get(transform.parentId);
-      if (parent?.worldMatrix) {
-        worldMat = multiply2D(parent.worldMatrix as Matrix2D, transform.localMatrix as Matrix2D);
-      } else {
-        worldMat = [...(transform.localMatrix as Matrix2D)];
-      }
+    // Recompute localMatrix if needed (in case position/rotation/scale changed)
+    if (t2d.isDirty) {
+      t2d.localMatrix = computeLocal2DMatrix(t2d);
     }
 
-    // Write back
-    const dbTransform = ctx.db.transform2d.entityId.find(entityId);
-    if (dbTransform) {
-      dbTransform.worldMatrix = worldMat;
-      dbTransform.isDirty = false;
-      ctx.db.transform2d.entityId.update(dbTransform);
-    }
+    // Compute worldMatrix = parentWorld * localMatrix
+    const parentWorld = getParentWorldMatrix(ctx, t2d.parentId);
+    t2d.worldMatrix = multiply2D(parentWorld, t2d.localMatrix);
 
-    processed++;
+    // Clear dirty flag
+    t2d.isDirty = false;
+    ctx.db.transform2d.entityId.update(t2d);
 
-    // Enqueue dirty children
-    const children = childrenMap.get(entityId) || [];
-    for (const childId of children) {
-      if (dirtyIds.has(childId)) {
-        queue.push(childId);
+    // Enqueue direct children
+    for (const child of ctx.db.transform2d.iter()) {
+      if (child.parentId === entityId && !visited.has(child.entityId)) {
+        queue.push(child.entityId);
       }
     }
   }
-
-  console.log(`Updated ${processed} transforms`);
+}
+//-----------------------------------------------
+// UPDATE ALL TRANSFORM 2D (HIERARCHY PROPAGATION)
+//-----------------------------------------------
+export const update_all_transform2d = spacetimedb.reducer((ctx) => {
+  console.log("Running full 2D hierarchy update");
+  updateTransformHierarchy2D(ctx);
 });
