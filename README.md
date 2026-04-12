@@ -328,9 +328,9 @@ function setupDBTransform2D(){
 ```js
 conn.reducers.setTransform2D({
     entityId:PARAMS.entityId, 
-    position:PARAMS.t2_position, // {x=0,y=0,z=0}
+    position:PARAMS.t2_position, // {x:0,y:0}
     rotation:PARAMS.t2_rotation, 
-    scale:PARAMS.t2_scale, // {x=1,y=1,z=1}
+    scale:PARAMS.t2_scale, // {x:1,y:1}
   });
 ```
 
@@ -373,7 +373,7 @@ conn.reducers.setTransform2D({
     entityId:PARAMS.entityId
   });
   console.log("getLocalTransform2D:", t2d);
-  // {position:{x:1,y:1,z:0},rotation:0,scale:{x:1,y:1,z:1}}
+  // {position:{x:0,y:0},rotation:0,scale:{x:1,y:1}}
 ```
 
 ### getLocalPosition2D:
@@ -406,7 +406,7 @@ conn.reducers.setTransform2D({
     entityId:PARAMS.entityId
   });
   console.log("getWorldTransform2D:", t2d);
-  // {position:{x:1,y:1,z:0},rotation:0,scale:{x:1,y:1,z:1}}
+  // {position:{x:1,y:1},rotation:0,scale:{x:1,y:1}}
 ```
 
 ### getWorldPosition2D:
