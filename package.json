@@ -13,6 +13,8 @@
   "dependencies": {
     "@noble/ciphers": "^2.1.1",
     "@noble/hashes": "^2.0.1",
+    "phaser": "^4.0.0",
+    "pixi.js": "^8.18.1",
     "spacetimedb": "^2.1.0",
     "three": "^0.183.2",
     "three-viewport-gizmo": "^2.2.0",

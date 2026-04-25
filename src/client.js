@@ -1,7 +1,7 @@
 //-----------------------------------------------
 // index
 //-----------------------------------------------
-import { connState, networkStatus, userIdentity } from './context';
+import { stateConn, networkStatus, userIdentity } from './context';
 import { DbConnection, tables } from './module_bindings';
 import { Pane } from 'https://cdn.jsdelivr.net/npm/tweakpane@4.0.5/dist/tweakpane.min.js';
 import van from "vanjs-core";
@@ -135,7 +135,7 @@ const conn = DbConnection.builder()
     localStorage.setItem(TOKEN_KEY, token);
     console.log('connnect');
     networkStatus.val = 'Connected';
-    connState.val = conn;
+    stateConn.val = conn;
     // console.log("identity: ", identity);
     console.log("identity: ", identity.toHexString());
     // console.log("conn: ", conn);
@@ -225,7 +225,7 @@ function update_model2d(mesh, row){
   mesh.position.set(worldPos.x, worldPos.y, 0);
   // console.log(worldRotation);
   // mesh.rotation.z = worldRotation;
-  const worldRot = extractWorldRotation(row.worldMatrix)
+  const worldRot = extractWorldRotation(row.worldMatrix);
   mesh.rotation.z = worldRot * (Math.PI / 180); 
   mesh.scale.set(worldScale.x, worldScale.y, 1);
 }
@@ -599,16 +599,6 @@ scale2DBinding = transform2DPropsFolder.addBinding(PARAMS, 't2_scale').on('chang
 const testFolder = pane.addFolder({
   title: 'Test',
 });
-
-testFolder.addButton({title:'start'}).on('click',()=>{
-  conn.reducers.startTransform2DAnimation();
-
-})
-
-testFolder.addButton({title:'stop'}).on('click',()=>{
-  // conn.reducers.stopTransform2DAnimation();
-  conn.reducers.stopTransform2DAnimation();
-})
 
 testFolder.addButton({title:'transform list'}).on('click',()=>{
   console.log(PARAMS.transform2d);
