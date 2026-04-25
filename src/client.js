@@ -600,6 +600,16 @@ const testFolder = pane.addFolder({
   title: 'Test',
 });
 
+testFolder.addButton({title:'start'}).on('click',()=>{
+  conn.reducers.startTransform2DAnimation();
+
+})
+
+testFolder.addButton({title:'stop'}).on('click',()=>{
+  // conn.reducers.stopTransform2DAnimation();
+  conn.reducers.stopTransform2DAnimation();
+})
+
 testFolder.addButton({title:'transform list'}).on('click',()=>{
   console.log(PARAMS.transform2d);
 })

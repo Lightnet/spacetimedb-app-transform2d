@@ -14,6 +14,40 @@
 - [x] reducer (function for client to access)
 - [ ] trigger event
 
+# build.ts
+  This script help build multiples files into single file for handle circular dependency due to how schedule tables need reducer to work.
+
+  The code is simple. There is tag filter base on layout. It was on find table tag. It will filter out common spacetimedb api call in order.
+
+
+## table_test.ts
+```
+// table:
+```
+  This will look for tag table. It will store the content to tables array.
+
+
+## script:
+```ts
+function getTag(filePath: string): 'type' | 'table' | 'reducer' | 'procedure' | 'view' | 'lifecycle' | 'other' {
+  const content = fs.readFileSync(filePath, 'utf-8').toLowerCase();
+
+  if (content.includes('// types:') || content.includes('// type:')) return 'type';
+  if (content.includes('// table:')) return 'table';
+  if (content.includes('// reducer:')) return 'reducer';
+  if (content.includes('// procedure:')) return 'procedure';
+  if (content.includes('// view:')) return 'view';
+  if (content.includes('// init') || 
+      content.includes('// onconnect') || 
+      content.includes('// ondisconnect') || 
+      content.includes('// lifecycle')) return 'lifecycle';
+  return 'other';
+}
+```
+
+Once all files in src are filter tag correct it will output the files in order to build single file. Note there is ingore file to help deal with custom files.
+
+
 # Notes:
   This is just the basic how transform 2D hierarchy. For handle the current view that player see required some filter from range base which matrix can't use but convert x and y format. There should be in docs about it.
 

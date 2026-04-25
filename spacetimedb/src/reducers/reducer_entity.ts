@@ -4,7 +4,7 @@
 import { t, SenderError } from 'spacetimedb/server';
 import spacetimedb from '../module';
 //-----------------------------------------------
-// CREATE ENTITY
+// reducer: create_entity
 //-----------------------------------------------
 export const create_entity = spacetimedb.reducer({}, 
   (ctx,{}) => {
@@ -13,7 +13,7 @@ export const create_entity = spacetimedb.reducer({},
     });
 });
 //-----------------------------------------------
-// DELETE ENTITY
+// reducer: delete_entity
 //-----------------------------------------------
 export const delete_entity = spacetimedb.reducer({entityId:t.string()}, 
   (ctx,{entityId}) => {

@@ -3,10 +3,10 @@
 //-----------------------------------------------
 import { t, SenderError } from 'spacetimedb/server';
 import spacetimedb from '../module';
-import { computeLocal2DMatrix, getParentWorldMatrix, multiply2D } from '../helper_transform2d';
+import { computeLocal2DMatrix, getParentWorld2DMatrix, multiply2D } from '../helper';
 import { Vect2 } from '../types';
 //-----------------------------------------------
-// ADD ENTITY TRANSFORM 2D
+// reducer: add_entity_transform2d
 //-----------------------------------------------
 export const add_entity_transform2d = spacetimedb.reducer(
   { entityId: t.string() }, 
@@ -36,7 +36,7 @@ export const add_entity_transform2d = spacetimedb.reducer(
   }
 });
 //-----------------------------------------------
-// REMOVE ENTITY TRANSFORM 2D
+// reducer: remove_entity_transform2d
 //-----------------------------------------------
 export const remove_entity_transform2d = spacetimedb.reducer(
   { entityId: t.string() }, 
@@ -45,7 +45,7 @@ export const remove_entity_transform2d = spacetimedb.reducer(
     console.log("delete transform2d id:", entityId)
 });
 //-----------------------------------------------
-// SET TRANSFORM 2D PARENT
+// reducer: set_transform2d_parent
 //-----------------------------------------------
 export const set_transform2d_parent = spacetimedb.reducer(
   { entityId: t.string(), parentId: t.string() }, 
@@ -87,7 +87,7 @@ function markSubtreeDirty2D(ctx: any, rootEntityId: string) {
   }
 };
 //-----------------------------------------------
-// SET TRANSFORM 2D POSITION, ROTATION AND SCALE
+// reducer: set_transform2d
 //-----------------------------------------------
 export const set_transform2d = spacetimedb.reducer(
   { entityId: t.string(), position:Vect2, rotation:t.f64(), scale:Vect2}, 
@@ -109,7 +109,7 @@ export const set_transform2d = spacetimedb.reducer(
   }
 });
 //-----------------------------------------------
-// SET TRANSFORM 2D POSITION
+// reducer: set_transform2d_position
 //-----------------------------------------------
 export const set_transform2d_position = spacetimedb.reducer(
   { entityId: t.string(),x:t.f64(), y:t.f64()}, 
@@ -129,7 +129,7 @@ export const set_transform2d_position = spacetimedb.reducer(
   }
 });
 //-----------------------------------------------
-// SET TRANSFORM 2D ROTATION
+// reducer: set_transform2d_rotation
 //-----------------------------------------------
 export const set_transform2d_rotation = spacetimedb.reducer(
   { entityId: t.string(), rotation:t.f64()}, 
@@ -146,7 +146,7 @@ export const set_transform2d_rotation = spacetimedb.reducer(
   }
 });
 //-----------------------------------------------
-// SET TRANSFORM 2D SCALE
+// reducer: set_transform2d_scale
 //-----------------------------------------------
 export const set_transform2d_scale = spacetimedb.reducer(
   { entityId: t.string(),x:t.f64(), y:t.f64()}, 
@@ -165,7 +165,7 @@ export const set_transform2d_scale = spacetimedb.reducer(
   }
 });
 //-----------------------------------------------
-// CLEAR ALL TRANSFORM 2D AND 3D
+// reducer: clear_all_transforms
 //-----------------------------------------------
 export const clear_all_transforms = spacetimedb.reducer((ctx) => {
   for(const _transform2d of ctx.db.transform2d.iter()){
@@ -208,7 +208,7 @@ function updateTransformHierarchy2D(ctx: any) {
     }
 
     // Compute worldMatrix = parentWorld * localMatrix
-    const parentWorld = getParentWorldMatrix(ctx, t2d.parentId);
+    const parentWorld = getParentWorld2DMatrix(ctx, t2d.parentId);
     t2d.worldMatrix = multiply2D(parentWorld, t2d.localMatrix);
 
     // Clear dirty flag
@@ -224,7 +224,7 @@ function updateTransformHierarchy2D(ctx: any) {
   }
 }
 //-----------------------------------------------
-// UPDATE ALL TRANSFORM 2D (HIERARCHY PROPAGATION)
+// reducer: update_all_transform2d
 //-----------------------------------------------
 export const update_all_transform2d = spacetimedb.reducer((ctx) => {
   console.log("Running full 2D hierarchy update");

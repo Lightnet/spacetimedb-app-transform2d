@@ -4,12 +4,14 @@
 import { schema, table, t, SenderError  } from 'spacetimedb/server';
 import { entity } from './tables/table_entity';
 import { transform2d } from './tables/table_transform2d';
+import { transform2dAnimation } from './tables/table_animation';
 //-----------------------------------------------
 // SCEHEMA
 //-----------------------------------------------
 const spacetimedb = schema({
   entity,
   transform2d,
+  transform2dAnimation,
 });
 //-----------------------------------------------
 // INIT

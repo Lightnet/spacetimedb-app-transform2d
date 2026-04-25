@@ -5,16 +5,7 @@
 import spacetimedb from '../module';
 import { t, SenderError  } from 'spacetimedb/server';
 import { Transform2DResult, Vect2 } from '../types';
-import { 
-  type Matrix2D, 
-  computeLocal2DMatrix, 
-  extractPositionFromMatrix, 
-  extractRotationFromMatrix, 
-  extractScaleFromMatrix, 
-  getParentWorldMatrix, 
-  identity, 
-  multiply2D 
-} from '../helper_transform2d';
+import { type Matrix2D, computeLocal2DMatrix, extractPositionFromMatrix, extractRotationFromMatrix, extractScaleFromMatrix, getParentWorld2DMatrix, identity, multiply2D } from '../helper';
 //-----------------------------------------------
 // GET TRANSFORM2D PARENT ID
 //-----------------------------------------------
@@ -80,7 +71,7 @@ export const get_world_transform2d = spacetimedb.procedure(
         ? computeLocal2DMatrix(t2d) 
         : (t2d.localMatrix as Matrix2D) ?? identity;
 
-      const parentWorld = getParentWorldMatrix(tx, t2d.parentId);
+      const parentWorld = getParentWorld2DMatrix(tx, t2d.parentId);
       const worldMat = multiply2D(parentWorld, local);
 
       return {
@@ -127,7 +118,7 @@ export const get_world_position_2d = spacetimedb.procedure(
         ? computeLocal2DMatrix(t2d) 
         : (t2d.localMatrix as Matrix2D) ?? identity;
 
-      const parentWorld = getParentWorldMatrix(tx, t2d.parentId);
+      const parentWorld = getParentWorld2DMatrix(tx, t2d.parentId);
       const worldMat = multiply2D(parentWorld, local);
 
       return extractPositionFromMatrix(worldMat);
@@ -167,7 +158,7 @@ export const get_world_rotation_2d = spacetimedb.procedure(
         ? computeLocal2DMatrix(t2d) 
         : (t2d.localMatrix as Matrix2D) ?? identity;
 
-      const parentWorld = getParentWorldMatrix(tx, t2d.parentId);
+      const parentWorld = getParentWorld2DMatrix(tx, t2d.parentId);
       const worldMat = multiply2D(parentWorld, local);
 
       return extractRotationFromMatrix(worldMat);
@@ -206,7 +197,7 @@ export const get_world_scale_2d = spacetimedb.procedure(
         ? computeLocal2DMatrix(t2d) 
         : (t2d.localMatrix as Matrix2D) ?? identity;
 
-      const parentWorld = getParentWorldMatrix(tx, t2d.parentId);
+      const parentWorld = getParentWorld2DMatrix(tx, t2d.parentId);
       const worldMat = multiply2D(parentWorld, local);
 
       return extractScaleFromMatrix(worldMat);
